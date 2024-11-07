@@ -1,21 +1,47 @@
-name: OpenTelemetry Export Trace
+#name: OpenTelemetry Export Trace
+#
+#on:
+#  workflow_run:
+#    workflows:
+#      - "Build Main"
+#    types: [completed]
+#
+#jobs:
+#  otel-export-trace:
+#    name: OpenTelemetry Export Trace
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: export trace
+#        uses: ./
+#        with:
+#          otlpEndpoint: grpc://api.honeycomb.io:443/
+#          otlpHeaders: ${{ secrets.DELIVERY_OTLP_HEADERS }}
+#          githubToken: ${{ secrets.GITHUB_TOKEN }}
+#          runId: ${{ github.event.workflow_run.id }}
+
+name: new-relic-exporter
 
 on:
   workflow_run:
-    workflows:
-      - "Build Main"
-    types: [completed]
+    workflows: ['*']
+    types: [completed] # defaults to run on every completed workflow run event
+
+env:
+  GHA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  NEW_RELIC_LICENSE_KEY: ${{ secrets.NEW_RELIC_LICENSE_KEY }}
+  GHA_RUN_ID: ${{ github.event.workflow_run.id }}
+  GHA_RUN_NAME: ${{ github.event.workflow_run.name }}
+  #GHA_CUSTOM_ATTS: '{"mycustomattributea":"test", "mycustomattributeb":10, "mycustomattributec":"My custom attribute"}'
+
 
 jobs:
-  otel-export-trace:
-    name: OpenTelemetry Export Trace
+  new-relic-exporter:
+    name: new-relic-exporter
     runs-on: ubuntu-latest
+    if: ${{ always() }}
     steps:
-      - uses: actions/checkout@v2
-      - name: export trace
-        uses: ./
-        with:
-          otlpEndpoint: grpc://api.honeycomb.io:443/
-          otlpHeaders: ${{ secrets.DELIVERY_OTLP_HEADERS }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          runId: ${{ github.event.workflow_run.id }}
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: new-relic-exporter
+        uses: newrelic-experimental/gha-new-relic-exporter@latest
