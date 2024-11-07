@@ -10,6 +10,7 @@ on:
       - ".github/workflows/build-main.yml"
     branches:
       - main
+  workflow_dispatch:    
 
 jobs:
   lint-and-test:
